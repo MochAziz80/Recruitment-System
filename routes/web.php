@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ApplicantController as AdminApplicantController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 
 Route::get('/', function () {
@@ -37,18 +38,14 @@ Route::get('/preview-cv/{filename}', function ($filename) {
     ]);
 })->name('preview.cv');
 
-// Route::get('/preview-cv/{filename}', [AdminApplicantController::class, 'previewCV'])->name('preview.cv');
 
 
-// Public job routes
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{id}', [JobController::class, 'show'])->name('jobs.show');
 
 
-// Authenticated users
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard with stats
     Route::middleware('role:administrator')->get('admin/dashboard', function () {
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -62,29 +59,27 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/my-applications', [ApplicationController::class, 'myApplications'])->name('applications.mine');
 
-    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Apply for a job
     Route::get('/jobs/{job}/apply', [ApplicationController::class, 'showApplyForm'])->name('applications.applyForm');
     Route::post('/jobs/{job}/apply', [ApplicationController::class, 'storeFromUser'])->name('applications.storeFromUser');
 
-    // Admin-only routes
     Route::middleware(['role:administrator'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('jobs', AdminJobController::class)->except(['index', 'show']);
         Route::resource('applications', ApplicationController::class);
     });
 
-    Route::middleware(['role:administrator'])->group(function () {
-        Route::prefix('admin')->middleware(['auth', 'role:administrator'])->group(function () {
-            Route::get('/user', [UserController::class, 'index'])->name('admin.users.index');
-            Route::put('/user/{user}', [UserController::class, 'update'])->name('admin.users.update');
-            Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
-        });
+    Route::middleware(['role:administrator'])->prefix('admin')->group(function () {
+        Route::get('/user', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('/user/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+        Route::post('/user/generate', [AdminUserController::class, 'store'])->name('admin.users.store');
+        Route::put('/user/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+        Route::delete('/user/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
     });
+
 
 
     Route::prefix('admin')->middleware(['role:administrator'])->name('admin.')->group(function () {
@@ -95,7 +90,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('applicants', AdminApplicantController::class)
             ->only(['index', 'show']);
         Route::put('/applicants/{id}/status', [AdminApplicantController::class, 'updateStatus'])->name('admin.applicants.updateStatus');
-
     });
 
     Route::prefix('admin')->middleware(['role:administrator'])->name('admin.')->group(function () {
@@ -105,11 +99,8 @@ Route::middleware(['auth'])->group(function () {
 
 
         Route::post('/export', [ExportController::class, 'export'])->name('admin.export');
-        // Route::post('/import', [ExcelController::class, 'import'])->name('import');
         Route::get('/admin/export/status/{filename}', [ExportController::class, 'checkExportStatus']);
-
     });
-
 });
 
 require __DIR__ . '/auth.php';

@@ -1,7 +1,8 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import { usePage } from '@inertiajs/vue3'
+import { useForm, usePage, router } from '@inertiajs/vue3'
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 import AdminSidebar from '@/Components/AdminSidebar.vue'
 
 const { props } = usePage()
@@ -30,7 +31,20 @@ function submit() {
     .map(s => s.trim())
     .filter(s => s.length > 0)
 
-  form.put(route('admin.jobs.update', job.value.id))
+  form.put(route('admin.jobs.update', job.value.id), {
+    onSuccess: () => {
+      toast.success('Job updated successfully!', {
+        autoClose: 3000,
+        position: toast.POSITION.BOTTOM_RIGHT,
+      })
+    },
+    onError: () => {
+      toast.error('Failed to update job. Please check the input.', {
+        autoClose: 4000,
+        position: toast.POSITION.BOTTOM_RIGHT,
+      })
+    }
+  })
 }
 </script>
 
@@ -40,7 +54,7 @@ function submit() {
     <AdminSidebar />
 
     <!-- Main content -->
-    <main class="flex-1 p-8 max-w-7xl mx-auto">
+    <main class="flex-1 p-6 w-full">
       <h1 class="text-3xl font-bold mb-6">Edit Job - {{ job.title }}</h1>
 
       <!-- Edit Form -->
@@ -78,7 +92,9 @@ function submit() {
         </div>
 
         <div class="mb-4">
-          <label for="requirements" class="block mb-1 font-semibold">Requirements (comma separated)</label>
+          <label for="requirements" class="block mb-1 font-semibold">
+            Requirements (comma separated)
+          </label>
           <input
             id="requirements"
             type="text"
@@ -109,34 +125,49 @@ function submit() {
 
       <!-- Audit Trail -->
       <section>
-        <h2 class="text-lg font-bold mb-4">Audit Trail</h2>
-        <table class="min-w-full border-collapse border border-gray-300">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="border border-gray-300 px-3 py-1 text-left">User</th>
-              <th class="border border-gray-300 px-3 py-1 text-left">Event</th>
-              <th class="border border-gray-300 px-3 py-1 text-left">Changed Fields</th>
-              <th class="border border-gray-300 px-3 py-1 text-left">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="audit in audits" :key="audit.id" class="border border-gray-300">
-              <td class="px-3 py-1">{{ audit.user ? audit.user.name : 'System' }}</td>
-              <td class="px-3 py-1 capitalize">{{ audit.event }}</td>
-              <td class="px-3 py-1">
-                <ul>
-                  <li v-for="(value, key) in audit.new_values" :key="key">
-                    <strong>{{ key }}:</strong> {{ audit.old_values[key] ?? '(new)' }} → {{ value }}
-                  </li>
-                </ul>
-              </td>
-              <td class="px-3 py-1">{{ new Date(audit.created_at).toLocaleString() }}</td>
-            </tr>
-            <tr v-if="audits.length === 0">
-              <td colspan="4" class="text-center py-4">No audit data available.</td>
-            </tr>
-          </tbody>
-        </table>
+        <h2 class="text-xl font-bold mb-4 border-b pb-2">Audit Trail</h2>
+        <div class="overflow-auto rounded shadow">
+          <table class="min-w-full table-auto border border-gray-300 text-sm">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr>
+                <th class="border px-4 py-2 text-left">User</th>
+                <th class="border px-4 py-2 text-left">Event</th>
+                <th class="border px-4 py-2 text-left">Changed Fields</th>
+                <th class="border px-4 py-2 text-left">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="audit in audits"
+                :key="audit.id"
+                class="odd:bg-white even:bg-gray-50"
+              >
+                <td class="border px-4 py-2 font-medium">
+                  {{ audit.user ? audit.user.name : 'System' }}
+                </td>
+                <td class="border px-4 py-2 capitalize">{{ audit.event }}</td>
+                <td class="border px-4 py-2">
+                  <ul class="space-y-1 list-disc pl-5">
+                    <li
+                      v-for="(value, key) in audit.new_values"
+                      :key="key"
+                    >
+                      <strong>{{ key }}</strong>: {{ audit.old_values[key] ?? '(new)' }} → {{ value }}
+                    </li>
+                  </ul>
+                </td>
+                <td class="border px-4 py-2 text-gray-600">
+                  {{ new Date(audit.created_at).toLocaleString() }}
+                </td>
+              </tr>
+              <tr v-if="audits.length === 0">
+                <td colspan="4" class="text-center text-gray-500 py-4">
+                  No audit data available.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   </div>

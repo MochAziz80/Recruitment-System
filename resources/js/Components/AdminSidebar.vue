@@ -1,6 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 import { HomeIcon, UsersIcon, BriefcaseIcon, ClipboardDocumentListIcon, PlusIcon, PencilIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, } from '@heroicons/vue/24/outline'
+import { usePage } from '@inertiajs/vue3'
+
+const { props } = usePage()
+const authUser = props.authUser
 
 const menu = ref([
   {
@@ -59,6 +63,7 @@ function toggleDropdown(name) {
 </script>
 
 <template>
+    
   <nav class="w-64 bg-gray-800 min-h-screen text-white p-4">
     <div v-for="section in menu" :key="section.category" class="mb-6">
       <h3 class="uppercase text-xs font-semibold mb-2 text-gray-400">{{ section.category }}</h3>

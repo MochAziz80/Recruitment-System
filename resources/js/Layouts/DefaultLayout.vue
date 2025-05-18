@@ -41,6 +41,13 @@
                         Dashboard Admin
                         </Link>
 
+                        <Link v-if="auth.user.role === 'applicant'"
+    href="/my-applications"
+    class="hover:text-white"
+    :class="{ 'text-white border-b-2 border-white pb-1': isActive('/my-applications') }">
+    Lamaran Saya
+</Link>
+
                         <div class="relative">
                             <button @click="dropdownOpen = !dropdownOpen"
                                 class="flex items-center space-x-2 text-white focus:outline-none">

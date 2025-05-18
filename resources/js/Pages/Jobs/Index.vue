@@ -3,15 +3,15 @@ import DefaultLayout from '@/Layouts/DefaultLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
 
-const props = defineProps({ jobs: Array });
+const props = defineProps({ jobs: Array, userApplications: Array });
 const filteredJobs = ref([]);
 const searchQuery = ref('');
 const selectedLocation = ref('Semua Lokasi');
-const selectedType = ref('Semua Tipe');
+const selectedStatus = ref('Semua Status');
 
 // List lokasi dan tipe unik untuk filter
 const locations = ref([]);
-const jobTypes = ref([]);
+const jobStatuses = ref([]);
 
 // Animasi saat halaman dimuat
 const isLoaded = ref(false);
@@ -25,8 +25,8 @@ onMounted(() => {
     const uniqueLocations = new Set(props.jobs.map(job => job.location));
     locations.value = ['Semua Lokasi', ...uniqueLocations];
     
-    const uniqueTypes = new Set(props.jobs.map(job => job.type || 'Full-time'));
-    jobTypes.value = ['Semua Tipe', ...uniqueTypes];
+    const uniqueStatuses = new Set(props.jobs.map(job => job.is_active ? 'Open' : 'Close'));
+    jobStatuses.value = ['Semua Status', ...uniqueStatuses];
   }
   
   // Aktifkan animasi loading
@@ -45,10 +45,10 @@ function filterJobs() {
     const matchesLocation = selectedLocation.value === 'Semua Lokasi' || 
       job.location === selectedLocation.value;
       
-    const matchesType = selectedType.value === 'Semua Tipe' || 
-      (job.type || 'Full-time') === selectedType.value;
-      
-    return matchesSearch && matchesLocation && matchesType;
+    const matchesStatus = selectedStatus.value === 'Semua Status' || 
+        (job.is_active ? 'Open' : 'Close') === selectedStatus.value;
+
+    return matchesSearch && matchesLocation && matchesStatus;
   });
 }
 
@@ -114,12 +114,12 @@ function formatDate(dateString) {
             </select>
             
             <select 
-              v-model="selectedType" 
-              @change="filterJobs"
-              class="rounded-lg border border-gray-300 py-3 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option v-for="type in jobTypes" :key="type">{{ type }}</option>
-            </select>
+  v-model="selectedStatus" 
+  @change="filterJobs"
+  class="rounded-lg border border-gray-300 py-3 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+>
+  <option v-for="status in jobStatuses" :key="status">{{ status }}</option>
+</select>
           </div>
         </div>
       </div>
@@ -158,9 +158,12 @@ function formatDate(dateString) {
             <p class="text-gray-600 mb-4 line-clamp-3">{{ job.description }}</p>
             
             <div class="flex flex-wrap gap-2 mb-4">
-              <span class="bg-blue-50 text-blue-700 rounded-full px-3 py-1 text-sm font-medium">
-                {{ job.type || 'Full-time' }}
-              </span>
+              <span class="bg-green-50 text-green-700 rounded-full px-3 py-1 text-sm font-medium" v-if="job.is_active">
+  Open
+</span>
+<span class="bg-red-50 text-red-700 rounded-full px-3 py-1 text-sm font-medium" v-else>
+  Close
+</span>
               <span class="bg-indigo-50 text-indigo-700 rounded-full px-3 py-1 text-sm font-medium">
                 {{ job.location }}
               </span>

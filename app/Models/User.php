@@ -13,7 +13,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes, HasUuids;
 
     protected $fillable = [
-        'id', 'name', 'email', 'password', 'role', 'phone', 'cv_path', 'application_status',
+        'id',
+        'name',
+        'email',
+        'password',
+        'role',
+        'phone',
+        'cv_path',
+        'application_status',
     ];
 
     protected $casts = [

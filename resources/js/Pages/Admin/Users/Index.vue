@@ -49,7 +49,6 @@ function deleteUser(id) {
   }
 }
 
-// Filter dan Sort
 const searchQuery = ref('')
 const sortAsc = ref(true)
 
@@ -202,7 +201,7 @@ watch(selectedRole, (newRole) => {
                 class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
-                <option value="administrator">Admin</option>
+                <option value="administrator">Administrator</option>
                 <option value="applicant">Applicant</option>
               </select>
             </div>

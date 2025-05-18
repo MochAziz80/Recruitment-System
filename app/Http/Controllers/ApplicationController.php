@@ -147,14 +147,16 @@ class ApplicationController extends Controller
     }
 
     public function showApplyForm(Request $request, $jobId)
-    {
+{
+    $job = Job::findOrFail($jobId);
+    $user = $request->user();
 
+    return Inertia::render('User/Applications/Apply', [
+        'job' => $job,
+        'user' => $user, // pastikan ini ada
+    ]);
+}
 
-        $job = Job::findOrFail($jobId);
-        $user = $request->user();
-
-        return Inertia::render('User/Applications/Apply', compact('job', 'user'));
-    }
 
     public function storeFromUser(Request $request, $jobId)
     {

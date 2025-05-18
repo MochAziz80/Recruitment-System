@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +12,6 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    // List users dengan filter, search, dan pagination
     public function index(Request $request)
     {
         $search = $request->input('search', '');
@@ -38,22 +38,20 @@ class UserController extends Controller
         ]);
     }
 
-    // Tampilkan form create user
     public function create()
     {
         return Inertia::render('Admin/Users/Create');
     }
 
-    // Simpan user baru ke database
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,applicant',
+            'role' => 'required|in:administrator,applicant',
             'phone' => 'nullable|string|max:20',
-            'cv' => 'nullable|file|mimes:pdf|max:512', // max 512 KB
+            'cv' => 'nullable|file|mimes:pdf|max:512',
             'application_status' => 'nullable|in:pending,approved,rejected',
         ]);
 
@@ -75,7 +73,6 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dibuat.');
     }
 
-    // Tampilkan form edit user
     public function edit(User $user)
     {
         return Inertia::render('Admin/Users/Edit', [
@@ -83,13 +80,12 @@ class UserController extends Controller
         ]);
     }
 
-    // Update data user
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required','string','email','max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => 'required|in:admin,applicant',
+            'role' => 'required|in:administrator,applicant',
             'phone' => 'nullable|string|max:20',
             'cv' => 'nullable|file|mimes:pdf|max:512',
             'application_status' => 'nullable|in:pending,approved,rejected',
@@ -105,7 +101,7 @@ class UserController extends Controller
         $user->fill([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'role' => $validated['role'],
+            // 'role' => $validated['role'],
             'phone' => $validated['phone'] ?? null,
             'application_status' => $validated['application_status'] ?? null,
         ]);
@@ -116,14 +112,12 @@ class UserController extends Controller
         }
 
         $user->save();
-
+        $user->syncRoles([$validated['role']]);
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
-    // Hapus user
     public function destroy(User $user)
     {
-        // Hapus file CV jika ada
         if ($user->cv_path) {
             Storage::disk('public')->delete($user->cv_path);
         }
