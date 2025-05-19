@@ -58,7 +58,9 @@ Route::middleware(['auth'])->group(function () {
     })->name('admin.dashboard');
 
     Route::get('/my-applications', [ApplicationController::class, 'myApplications'])->name('applications.mine');
-
+Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -87,9 +89,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('admin')->middleware(['role:administrator'])->name('admin.')->group(function () {
-        Route::resource('applicants', AdminApplicantController::class)
-            ->only(['index', 'show']);
-        Route::put('/applicants/{id}/status', [AdminApplicantController::class, 'updateStatus'])->name('admin.applicants.updateStatus');
+        Route::resource('applicants', AdminApplicantController::class)->only(['index', 'show']);
+        Route::put('/applicants/{id}/status', [AdminApplicantController::class, 'updateStatus'])->name('applicants.updateStatus');
     });
 
     Route::prefix('admin')->middleware(['role:administrator'])->name('admin.')->group(function () {

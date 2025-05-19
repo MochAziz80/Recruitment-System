@@ -26,7 +26,7 @@ const props = defineProps({
 
           <tr v-for="app in applications.data" :key="app.id" class="hover:bg-blue-50 transition-colors">
             <td class="py-3 px-4 border-b border-gray-200 font-medium text-gray-800">
-              {{ app.job?.title || 'N/A' }}
+              {{ app.job_title || 'N/A' }}
             </td>
             <td class="py-3 px-4 border-b border-gray-200 text-gray-600">
               {{ new Date(app.applied_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) }}
